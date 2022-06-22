@@ -19,7 +19,7 @@ export const Layout: FC<LayoutProps> = ({ children, title }) => {
     return (
         <>
             <Head>
-                <title>{`${newTitle} | Pokédex` || 'Pokédex'}</title>
+                <title>{!!title ? `${newTitle} | Pokédex` : 'Pokédex'}</title>
                 <meta name="author" content="Aldemar García" />
                 <meta name="description" content={`Información sobre el pokemon ${title}`} />
                 <meta name="keywords" content={`${title}, pokemon, pokemon app, pokemon ${title}, pokedex`} />

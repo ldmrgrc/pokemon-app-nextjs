@@ -22,7 +22,7 @@ const PokemonByNamePage: NextPage<Props> = ({ pokemon }) => {
         localFavorites.toggleFavorite(pokemon.id)
         setIsInFavorite(!isInFavorite)
 
-        if(!isInFavorite) {
+        if (!isInFavorite) {
             confetti({
                 zIndex: 999,
                 particleCount: 100,
@@ -35,7 +35,7 @@ const PokemonByNamePage: NextPage<Props> = ({ pokemon }) => {
             })
         }
     }
-    
+
     return (
         <Layout title={pokemon.name}>
             <Grid.Container css={{ marginTop: '5px' }} gap={2} >
@@ -43,7 +43,7 @@ const PokemonByNamePage: NextPage<Props> = ({ pokemon }) => {
                     <Card isHoverable css={{ padding: '$10' }} variant='bordered' >
                         <Card.Body>
                             <Card.Image
-                                src={pokemon.sprites.other?.dream_world.front_default || '/no-image.png'}
+                                src={pokemon.sprites.other?.dream_world.front_default || pokemon.sprites.front_default || '/no-image.png'}
                                 alt={pokemon.name}
                                 width='100%'
                                 height={200}
@@ -65,7 +65,7 @@ const PokemonByNamePage: NextPage<Props> = ({ pokemon }) => {
                                 auto
                                 onPress={onToggleFavorite}
                             >
-                                <BsStarFill />
+                                {isInFavorite ? <BsStarFill color='gold' /> : <BsStarFill />}
                             </Button>
                         </Card.Header>
 
@@ -113,17 +113,29 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
     return {
         paths: pokemonNames.map(name => ({ params: { name } })),
-        fallback: false
+        fallback: 'blocking'
     }
 }
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
     const { name } = params as { name: string }
-    
+
+    const pokemon = await getPokemonInfo(name)
+
+    if (!pokemon) {
+        return {
+            redirect: {
+                destination: '/',
+                permanent: false
+            }
+        }
+    }
+
     return {
         props: {
-            pokemon: await getPokemonInfo(name)
-        }
+            pokemon
+        }, 
+        revalidate: 86400,
     }
 }
 

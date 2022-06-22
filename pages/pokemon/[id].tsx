@@ -43,7 +43,7 @@ const PokemonPage: NextPage<Props> = ({ pokemon }) => {
                     <Card isHoverable css={{ padding: '$10' }} variant='bordered' >
                         <Card.Body>
                             <Card.Image
-                                src={pokemon.sprites.other?.dream_world.front_default || '/no-image.png'}
+                                src={pokemon.sprites.other?.dream_world.front_default || pokemon.sprites.front_default || '/no-image.png'}
                                 alt={pokemon.name}
                                 width='100%'
                                 height={200}
@@ -113,7 +113,7 @@ export const getStaticPaths: GetStaticPaths = async (ctx) => {
     const pokemons151 = [...Array(151)].map((value, index) => `${index + 1}`);
     return {
         paths: pokemons151.map(id => ({ params: { id } })),
-        fallback: false
+        fallback: 'blocking'
     }
 }
 
@@ -121,10 +121,22 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 
     const { id } = params as { id: string }
 
+    const pokemon = await getPokemonInfo(id)
+
+    if(!pokemon) {
+        return {
+            redirect: {
+                destination: '/',
+                permanent: false
+            }
+        }
+    }
+
     return {
         props: {
-            pokemon: await getPokemonInfo(id)
-        }
+            pokemon
+        },
+        revalidate: 86400,
     }
 }
 
